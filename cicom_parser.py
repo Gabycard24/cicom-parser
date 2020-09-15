@@ -220,4 +220,9 @@ if __name__ == '__main__':
     f = open("test.txt", "r")
     data = f.read()
     parser.parse(lexer.tokenize(data))
-    print("If no error output is shown, the language is syntactically correct")
+    print("No errors should be output above, as test.txt is syntactically correct")
+
+    g = open("testmissingparen.txt", "r")
+    data1 = g.read()
+    parser.parse(lexer.tokenize(data1))
+    print("There should be an error output above, as testmissingparen.txt is not syntactically correct")
