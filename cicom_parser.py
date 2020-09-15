@@ -6,10 +6,6 @@ class CicomParser(Parser):
     tokens = CicomLexer.tokens
 
     # Grammar rules and actions
-    @_('')
-    def exp(self, p):
-        pass
-
     @_('term binopexps')
     def exp(self, p):
         return ('init_exp', p.term, p.binopexps)
@@ -26,21 +22,9 @@ class CicomParser(Parser):
     def exp(self, p):
         return ('map_exp', p.idlist, p.exp)
 
-    @_('binopexp binopexp')
-    def binopexps(self, p):
-        return ('binop_exps', p.binopexp, p.binopexp)
-
-    @_('binopexp')
-    def binopexps(self, p):
-        return p.binopexp
-
-    @_('binop exp')
-    def binopexp(self, p):
-        return ('binop_exp', p.binop, p.exp)
-
-    @_('adef adef')
+    @_('defs defs')
     def defs(self, p):
-        return ('defs', p.adef0, p.adef1)
+        return ('defs', p.defs0, p.defs1)
 
     @_('adef')
     def defs(self, p):
@@ -50,13 +34,29 @@ class CicomParser(Parser):
     def adef(self, p):
         return ('def', p.ID, p.exp)
 
+    @_('binopexps binopexps')
+    def binopexps(self, p):
+        return ('binop_exps', p.binopexp, p.binopexp)
+
+    @_('binopexp')
+    def binopexps(self, p):
+        return p.binopexp
+
+    @_('empty')
+    def binopexps(self, p):
+        return p.empty
+
+    @_('binop exp')
+    def binopexp(self, p):
+        return ('binop_exp', p.binop, p.exp)
+
     @_('unop term')
     def term(self, p):
         return ('unop_term', p.unop, p.term)
     
     @_('factor delimexplists')
     def term(self, p):
-        return ('factor_term', p.factor, p.explist)
+        return ('factor_term', p.factor, p.delimexplists)
 
     @_('factor')
     def term(self, p):
@@ -92,7 +92,11 @@ class CicomParser(Parser):
 
     @_('delimexplist')
     def delimexplists(self, p):
-        return p.explist
+        return p.delimexplist
+
+    @_('empty')
+    def delimexplists(self, p):
+        return p.empty
 
     @_('"(" explist ")"')
     def delimexplist(self, p):
@@ -102,9 +106,9 @@ class CicomParser(Parser):
     def explist(self, p):
         return p.propexplists
 
-    @_('')
+    @_('empty')
     def explist(self, p):
-        return 'EMPTY'
+        return p.empty
 
     @_('propexplists propexplists')
     def propexplists(self, p):
@@ -126,9 +130,9 @@ class CicomParser(Parser):
     def idlist(self, p):
         return p.propidlists
 
-    @_('')
+    @_('empty')
     def idlist(self, p):
-        return 'EMPTY'
+        return p.empty
 
     @_('propidlists propidlists')
     def propidlists(self, p):
@@ -146,10 +150,6 @@ class CicomParser(Parser):
     def propidlist(self, p):
         return p.ID
 
-    @_('PLUS')
-    def factor(self, p):
-        return p.PLUS
-
     @_('sign')
     def unop(self, p):
         return p.sign
@@ -162,58 +162,62 @@ class CicomParser(Parser):
     def binop(self, p):
         return p.sign
 
-    @_("STAR")
+    @_('STAR')
     def binop(self, p):
         return p.STAR
 
-    @_("SLASH")
+    @_('SLASH')
     def binop(self, p):
         return p.SLASH
 
-    @_("EQUAL")
+    @_('EQUAL')
     def binop(self, p):
         return p.EQUAL
 
-    @_("NEQUAL")
+    @_('NEQUAL')
     def binop(self, p):
         return p.NEQUAL
 
-    @_("LTHAN")
+    @_('LTHAN')
     def binop(self, p):
         return p.LTHAN
 
-    @_("GTHAN")
+    @_('GTHAN')
     def binop(self, p):
         return p.GTHAN
 
-    @_("LETHAN")
+    @_('LETHAN')
     def binop(self, p):
         return p.LETHAN
 
-    @_("GETHAN")
+    @_('GETHAN')
     def binop(self, p):
         return p.GETHAN
 
-    @_("AMPERSAND")
+    @_('AMPERSAND')
     def binop(self, p):
         return p.AMPERSAND
 
-    @_("BAR")
+    @_('BAR')
     def binop(self, p):
         return p.BAR
 
-    @_("PLUS")
+    @_('PLUS')
     def sign(self, p):
         return p.PLUS
 
-    @_("MINUS")
+    @_('MINUS')
     def sign(self, p):
         return p.MINUS
+
+    @_('')
+    def empty(self, p):
+        pass
 
 if __name__ == '__main__':
     lexer = CicomLexer()
     parser = CicomParser()
     f = open("test.txt", "r")
     data = f.read()
-    
-    print (parser.parse(lexer.tokenize(data)))
+    parser.parse(lexer.tokenize(data))
+    print("If no error output is shown, the language is syntactically correct")
